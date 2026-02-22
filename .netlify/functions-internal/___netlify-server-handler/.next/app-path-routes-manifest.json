@@ -1,0 +1,15 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/_global-error/page": "/_global-error",
+  "/rss.xml/route": "/rss.xml",
+  "/api/keystatic/[[...params]]/route": "/api/keystatic/[[...params]]",
+  "/feed.xml/route": "/feed.xml",
+  "/connect/page": "/connect",
+  "/about/page": "/about",
+  "/keystatic/[[...params]]/page": "/keystatic/[[...params]]",
+  "/playground/page": "/playground",
+  "/page": "/",
+  "/work/page": "/work",
+  "/writing/[slug]/page": "/writing/[slug]",
+  "/writing/page": "/writing"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Developer Portfolio",
+  "short_name": "Portfolio",
+  "description": "A showcase of my work as a software developer",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#DC143C",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

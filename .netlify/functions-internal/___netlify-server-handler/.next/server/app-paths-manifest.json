@@ -1,0 +1,15 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/rss.xml/route": "app/rss.xml/route.js",
+  "/api/keystatic/[[...params]]/route": "app/api/keystatic/[[...params]]/route.js",
+  "/feed.xml/route": "app/feed.xml/route.js",
+  "/connect/page": "app/connect/page.js",
+  "/about/page": "app/about/page.js",
+  "/keystatic/[[...params]]/page": "app/keystatic/[[...params]]/page.js",
+  "/playground/page": "app/playground/page.js",
+  "/page": "app/page.js",
+  "/work/page": "app/work/page.js",
+  "/writing/[slug]/page": "app/writing/[slug]/page.js",
+  "/writing/page": "app/writing/page.js"
+}

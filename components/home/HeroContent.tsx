@@ -1,8 +1,8 @@
 'use client';
 
+import * as styles from '@/app/page.css';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import * as styles from '@/app/page.css';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -21,7 +21,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: 'easeOut',
+      ease: 'easeOut' as const,
     },
   },
 };
