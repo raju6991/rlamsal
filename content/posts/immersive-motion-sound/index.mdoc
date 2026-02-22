@@ -1,0 +1,29 @@
+---
+title: "Crafting Immersive Experiences: Framer Motion & Sound Design"
+slug: "immersive-motion-sound"
+excerpt: "Adding depth to the web through fluid animations and a reactive sound system."
+publishedDate: "2024-02-23"
+coverImage: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000&auto=format&fit=crop"
+tags:
+  - "Framer Motion"
+  - "Web Audio"
+  - "UX"
+---
+
+Animations shouldn't just be "eye candy"—they should provide feedback and guide the user's attention. In this project, I used **Framer Motion** for layout transitions and **use-sound** for a tactile audio experience.
+
+## Orchestrating Motion
+
+Framer Motion makes it incredibly easy to handle layout changes. By using the `layout` prop, elements smoothly transition to their new positions without manual calculations.
+
+{% illustration initialCode="/* Framer Motion Animation Logic */\n.card {\n  display: flex;\n  gap: 1rem;\n}" type="animation" /%}
+
+## Bringing Sound to Life
+
+Inspired by modern OS interfaces, I integrated a subtle sound system. Links, buttons, and even toggle switches provide acoustic feedback, making the interface feel more physical.
+
+```tsx
+const [play] = useSound('/sounds/pop.mp3');
+// ...
+<button onClick={() => play()}>Click Me</button>
+```
