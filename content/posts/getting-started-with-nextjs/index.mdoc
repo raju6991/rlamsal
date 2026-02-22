@@ -1,0 +1,57 @@
+---
+title: Getting Started with Next.js 16
+slug: getting-started-with-nextjs
+excerpt: Learn how to build modern web applications with Next.js 16 and its new features.
+publishedDate: 2024-01-15
+tags:
+  - Next.js
+  - React
+  - Tutorial
+---
+
+Next.js 16 introduces exciting new features that make building modern web applications even more powerful.
+
+## What's New in Next.js 16
+
+### Improved Performance
+
+Next.js 16 brings significant performance improvements with better caching strategies.
+
+```typescript
+// Server Action example
+async function createPost(formData: FormData) {
+  'use server';
+  
+  const title = formData.get('title');
+  const content = formData.get('content');
+  
+  await db.posts.create({ title, content });
+  revalidatePath('/writing');
+}
+```
+
+### Partial Prerendering
+
+Mix static and dynamic content seamlessly:
+
+```tsx
+export default function Page() {
+  return (
+    <div>
+      <Suspense fallback={<Skeleton />}>
+        <Comments />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+## Getting Started
+
+```bash
+npx create-next-app@latest my-app
+```
+
+## Conclusion
+
+Next.js 16 continues to evolve making it the best choice for modern web applications.

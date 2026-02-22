@@ -1,0 +1,22 @@
+---
+title: 'Real-time Presence with PartyKit: Making the Web Social'
+excerpt: >-
+  Integrating PartyKit to show live cursors and shared state in the CSS
+  playground.
+publishedDate: 2026-02-24
+tags:
+  - PartyKit
+  - WebSockets
+  - Real-time
+---
+## Live Cursors and Shared State
+
+PartyKit allows us to spin up a WebSocket server with almost zero configuration. Every time a user moves their mouse over the preview area, a message is broadcast to all other connected clients.
+
+{% illustration
+   initialCode=".grid-container {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 10px;\n}"
+   type="grid" /%}
+
+## Why PartyKit?
+
+Traditional WebSocket setups require managing servers, horizontal scaling, and persistence. PartyKit handles all of this, letting me focus on the user experience rather than server infra.
