@@ -6,7 +6,7 @@ export default config({
     kind: "github",
     repo: {
       owner: "raju6991",
-      name: "rajulamsal6991/rlamsal",
+      name: "raju6991/rlamsal",
     },
   },
   ui: {
