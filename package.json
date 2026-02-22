@@ -13,6 +13,7 @@
     "party": "partykit dev"
   },
   "dependencies": {
+    "@vanilla-extract/next-plugin": "^2.4.17",
     "next": "^16.0.5",
     "react": "19.2.3",
     "react-dom": "19.2.3"
