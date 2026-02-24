@@ -1,0 +1,229 @@
+---
+title: The Complete Guide to Vanilla Extract CSS in Next.js
+slug: vanilla-extract-css-guide
+excerpt: Learn how to use Vanilla Extract for type-safe CSS-in-JS in your Next.js applications. Zero runtime overhead with full TypeScript support.
+publishedDate: 2024-01-20
+tags:
+  - CSS
+  - Vanilla Extract
+  - Next.js
+  - TypeScript
+---
+
+Vanilla Extract is a zero-runtime CSS-in-JS library that brings type safety and excellent developer experience to styling your Next.js applications. In this guide, we'll explore everything you need to know to get started and master this powerful tool.
+
+## Why Vanilla Extract?
+
+Traditional CSS-in-JS solutions like styled-components or Emotion inject styles at runtime, which can impact performance. Vanilla Extract compiles your styles to static CSS files during build time, giving you:
+
+- Zero runtime overhead
+- Full TypeScript support
+- CSS variables out of the box
+- Excellent debugging with source maps
+
+## Getting Started
+
+First, install the required packages:
+
+```bash
+npm install @vanilla-extract/css @vanilla-extract/next-plugin
+```
+
+### Configure Next.js
+
+Update your `next.config.ts`:
+
+```typescript
+import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
+
+const withVanillaExtract = createVanillaExtractPlugin();
+
+const nextConfig = {
+  // your existing config
+};
+
+export default withVanillaExtract(nextConfig);
+```
+
+## Creating Theme Variables
+
+Vanilla Extract uses CSS variables through its theme contract system. Create a `theme.css.ts` file:
+
+```typescript
+import { createGlobalTheme, createThemeContract, globalStyle } from '@vanilla-extract/css';
+
+export const vars = createThemeContract({
+  color: {
+    primary: {
+      default: null,
+      dark: null,
+      light: null,
+    },
+    background: {
+      default: null,
+      alt: null,
+    },
+    text: {
+      primary: null,
+      secondary: null,
+    },
+  },
+  spacing: {
+    sm: null,
+    md: null,
+    lg: null,
+  },
+});
+
+// Define light theme
+createGlobalTheme(':root', vars, {
+  color: {
+    primary: { default: '#DC143C', dark: '#8B0000', light: '#FF6B6B' },
+    background: { default: '#FFFFFF', alt: '#FAFAFA' },
+    text: { primary: '#1A1A1A', secondary: '#666666' },
+  },
+  spacing: { sm: '8px', md: '16px', lg: '24px' },
+});
+
+// Define dark theme
+createGlobalTheme('[data-theme="dark"]', vars, {
+  color: {
+    primary: { default: '#FF4D6A', dark: '#DC143C', light: '#FF8A9E' },
+    background: { default: '#0D0D0D', alt: '#1A1A1A' },
+    text: { primary: '#F5F5F5', secondary: '#A0A0A0' },
+  },
+  spacing: { sm: '8px', md: '16px', lg: '24px' },
+});
+```
+
+## Creating Styles
+
+Now create component styles using the theme variables:
+
+```typescript
+import { vars } from './theme.css';
+import { style, globalStyle } from '@vanilla-extract/css';
+
+export const button = style({
+  padding: `${vars.spacing.md} ${vars.spacing.lg}`,
+  backgroundColor: vars.color.primary.default,
+  color: '#fff',
+  borderRadius: '8px',
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  ':hover': {
+    backgroundColor: vars.color.primary.dark,
+  },
+});
+
+export const container = style({
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: `0 ${vars.spacing.lg}`,
+});
+```
+
+## Using Styles in Components
+
+Import and use your styles in React components:
+
+```typescript
+import * as styles from './Button.css';
+
+export function Button({ children, onClick }) {
+  return (
+    <button className={styles.button} onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+```
+
+## Advanced Features
+
+### Global Styles
+
+Add global styles for base elements:
+
+```typescript
+globalStyle('html, body', {
+  margin: 0,
+  padding: 0,
+  fontFamily: vars.font.body,
+  backgroundColor: vars.color.background.default,
+  color: vars.color.text.primary,
+});
+
+globalStyle('a', {
+  color: 'inherit',
+  textDecoration: 'none',
+});
+```
+
+### Media Queries
+
+Use responsive design with media queries:
+
+```typescript
+export const grid = style({
+  display: 'grid',
+  gap: vars.spacing.md,
+  '@media': {
+    'screen and (min-width: 768px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+    },
+    'screen and (min-width: 1024px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+    },
+  },
+});
+```
+
+### Selectors and Pseudo-classes
+
+Apply styles to specific states:
+
+```typescript
+export const link = style({
+  color: vars.color.text.primary,
+  selectors: {
+    '&:hover': {
+      color: vars.color.primary.default,
+    },
+    '&:focus': {
+      outline: `2px solid ${vars.color.primary.default}`,
+    },
+  },
+});
+```
+
+### Complex Animations
+
+Create smooth animations with keyframes:
+
+```typescript
+import { keyframes } from '@vanilla-extract/css';
+
+const fadeIn = keyframes({
+  '0%': { opacity: 0, transform: 'translateY(10px)' },
+  '100%': { opacity: 1, transform: 'translateY(0)' },
+});
+
+export const animatedCard = style({
+  animation: `${fadeIn} 0.3s ease forwards`,
+});
+```
+
+## Best Practices
+
+1. **Organize by feature**: Keep styles close to the components that use them
+2. **Use theme variables**: Always reference theme values instead of hardcoded colors
+3. **Leverage TypeScript**: Take advantage of autocomplete for theme properties
+4. **Group related styles**: Use style composition for related variants
+
+## Conclusion
+
+Vanilla Extract provides an excellent developer experience while generating optimized, static CSS. Its type-safe approach catches errors at compile time, and the zero-runtime philosophy ensures excellent performance. Give it a try in your next Next.js project!
+
+The theme system makes implementing dark mode trivial, and the CSS variable output means your styles are easily inspectable in browser dev tools. It's truly the best of both worlds.

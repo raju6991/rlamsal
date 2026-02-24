@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  productionBrowserSourceMaps: true,
   webpack: (config) => {
     return config;
   },

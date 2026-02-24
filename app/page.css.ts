@@ -131,8 +131,7 @@ export const codeContent = style({
   color: '#d4d4d4',
   lineHeight: 1.6,
   overflowX: 'auto',
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word',
+  whiteSpace: 'pre',
 });
 
 export const section = style({

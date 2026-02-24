@@ -94,7 +94,7 @@ createGlobalTheme(':root', vars, {
     },
     text: {
       primary: '#1A1A1A',
-      secondary: '#666666',
+      secondary: '#4D4D4D',
     },
     accent: '#FF6B6B',
     border: '#E5E5E5',

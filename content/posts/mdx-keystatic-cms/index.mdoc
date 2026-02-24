@@ -1,0 +1,290 @@
+---
+title: Building a Blog with MDX and Keystatic CMS
+slug: mdx-keystatic-cms
+excerpt: A comprehensive guide to creating a modern blog using MDX for content and Keystatic as a Git-based CMS.
+publishedDate: 2024-01-25
+tags:
+  - MDX
+  - Keystatic
+  - CMS
+  - Next.js
+  - Tutorial
+---
+
+Managing blog content shouldn't be complicated. In this guide, we'll build a powerful blog system using MDX for rich content and Keystatic as a Git-based CMS that stores content directly in your repository.
+
+## Why Keystatic?
+
+Keystatic offers several advantages:
+
+- **Git-based**: Content lives in your repo as MDX files
+- **No database**: Uses your GitHub repository as storage
+- **Local development**: Works entirely locally
+- **Excellent DX**: Full TypeScript support
+- **Customizable**: Build exactly the editor you need
+
+## Installation
+
+First, install the required packages:
+
+```bash
+npm install @keystatic/core @keystatic/next @keystatic/reader
+```
+
+## Configuring Keystatic
+
+Create a `keystatic.config.tsx` in your project root:
+
+```typescript
+import { collection, component, config, fields } from "@keystatic/core";
+import React from "react";
+
+export default config({
+  storage: {
+    kind: "github",
+    repo: {
+      owner: "yourusername",
+      name: "your-repo",
+    },
+  },
+  collections: {
+    posts: collection({
+      label: "Posts",
+      slugField: "slug",
+      path: "content/posts/*",
+      format: { contentField: "content" },
+      entryLayout: "content",
+      schema: {
+        title: fields.text({ label: "Title" }),
+        slug: fields.text({ label: "Slug" }),
+        excerpt: fields.text({ label: "Excerpt", multiline: true }),
+        publishedDate: fields.date({ label: "Published Date" }),
+        tags: fields.array(fields.text({ label: "Tag" }), {
+          label: "Tags",
+        }),
+        content: fields.document({
+          label: "Content",
+          formatting: true,
+          dividers: true,
+          links: true,
+          images: {
+            directory: "public/images/posts",
+            publicPath: "/images/posts",
+          },
+        }),
+      },
+    }),
+  },
+});
+```
+
+## Setting Up the API Routes
+
+Keystatic needs API routes to function in Next.js App Router:
+
+```typescript
+// app/api/keystatic/[[...params]]/route.ts
+import { makeRouteHandler } from "@keystatic/next/route-handler";
+import config from "../../../../keystatic.config";
+
+export const { GET, POST } = makeRouteHandler({
+  config,
+});
+```
+
+## Creating the Admin UI
+
+Create a page to access the Keystatic admin:
+
+```typescript
+// app/keystatic/[[...params]]/page.tsx
+import { KeystoneProvider } from "@keystatic/next/ui";
+import { ReactNode } from "react";
+import config from "../../../keystatic.config";
+
+export default function KeystaticPage({ children }: { children: ReactNode }) {
+  return (
+    <KeystaticProvider config={config}>
+      {children}
+    </KeystaticProvider>
+  );
+}
+```
+
+## Reading Content
+
+Use the Keystatic reader to fetch your MDX content:
+
+```typescript
+// lib/keystatic.ts
+import { createReader } from "@keystatic/core/reader";
+import config from "../keystatic.config";
+
+export const reader = createReader(process.cwd(), config);
+```
+
+### Fetching All Posts
+
+```typescript
+import { reader } from "@/lib/keystatic";
+
+export async function getPosts() {
+  const posts = await reader.collections.posts.all();
+  
+  return posts.map((post) => ({
+    slug: post.slug,
+    ...post.entry,
+  }));
+}
+```
+
+### Fetching a Single Post
+
+```typescript
+export async function getPost(slug: string) {
+  const post = await reader.collections.posts.read(slug);
+  
+  if (!post) {
+    return null;
+  }
+  
+  return {
+    slug,
+    ...post,
+  };
+}
+```
+
+## Rendering MDX Content
+
+Keystatic stores content as a document that needs to be serialized:
+
+```typescript
+// components/Markdown.tsx
+import { documentToHtmlString } from "@keystatic/core/document/transform";
+import { reader } from "@/lib/keystatic";
+
+export default async function MarkdownContent({ slug }: { slug: string }) {
+  const post = await reader.collections.posts.read(slug);
+  
+  if (!post) return null;
+  
+  const contentHtml = documentToHtmlString(post.content);
+  
+  return (
+    <article 
+      className="prose"
+      dangerouslySetInnerHTML={{ __html: contentHtml }} 
+    />
+  );
+}
+```
+
+## Custom Component Blocks
+
+Keystatic allows creating custom blocks for rich content:
+
+```typescript
+// In your keystatic.config.ts
+componentBlocks: {
+  image: component({
+    label: "Image",
+    preview: (props) => (
+      <div style={{ margin: "1rem 0" }}>
+        <img 
+          src={props.fields.src.value} 
+          alt={props.fields.alt.value}
+          style={{ width: "100%" }}
+        />
+      </div>
+    ),
+    schema: {
+      src: fields.text({ label: "Source URL" }),
+      alt: fields.text({ label: "Alt text" }),
+    },
+  }),
+  callout: component({
+    label: "Callout",
+    preview: (props) => (
+      <div style={{ 
+        padding: "1rem", 
+        background: "#f0f0f0",
+        borderLeft: "4px solid #DC143C"
+      }}>
+        {props.fields.text.value}
+      </div>
+    ),
+    schema: {
+      text: fields.text({ label: "Text" }),
+      type: fields.select({
+        label: "Type",
+        options: [
+          { label: "Info", value: "info" },
+          { label: "Warning", value: "warning" },
+          { label: "Success", value: "success" },
+        ],
+      }),
+    },
+  }),
+},
+```
+
+## Adding Syntax Highlighting
+
+For code blocks, integrate a syntax highlighter:
+
+```typescript
+import { codeToHtml } from "shiki";
+
+async function highlightCode(code: string, language: string) {
+  return await codeToHtml(code, {
+    lang: language,
+    theme: "github-dark",
+  });
+}
+```
+
+## Optimizing Images
+
+Keystatic supports image uploads. Configure Next.js Image optimization:
+
+```typescript
+// next.config.ts
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+};
+```
+
+## Deployment
+
+When deploying to Netlify or Vercel:
+
+1. Create a GitHub OAuth app for Keystatic
+2. Set environment variables for the client secret
+3. Configure the GitHub app permissions for repository access
+
+```bash
+# Environment variables
+KEYSTATIC_SECRET=your-secret-key
+KEYSTATIC_GITHUB_CLIENT_ID=your-client-id
+KEYSTATIC_GITHUB_CLIENT_SECRET=your-client-secret
+```
+
+## Benefits of This Setup
+
+1. **Version Control**: Every content change is a Git commit
+2. **Review Workflow**: Use pull requests for content reviews
+3. **No Lock-in**: Your content is just MDX files
+4. **Team Collaboration**: Multiple authors can work together
+5. **Offline First**: Work without internet connection
+
+## Conclusion
+
+Keystatic provides an excellent developer experience for managing MDX content. Combined with Next.js, you get a powerful, type-safe blog system that puts content management directly in your repository. Give it a try for your next project!

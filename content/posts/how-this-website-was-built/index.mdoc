@@ -1,0 +1,441 @@
+---
+title: Building This Portfolio - A Deep Dive into the Tech Stack
+slug: how-this-website-was-built
+excerpt: An in-depth look at how I built this portfolio website using Next.js 16, Vanilla Extract, Keystatic CMS, and deployed to Netlify.
+publishedDate: 2024-01-28
+tags:
+  - Next.js
+  - Portfolio
+  - Vanilla Extract
+  - Keystatic
+  - Netlify
+  - Tutorial
+---
+
+Building a personal website is a project that almost every developer undertakes at some point. But building one that truly showcases your skills, performs well, and is easy to maintain is a different challenge. In this comprehensive guide, I'll walk you through how I built this portfolio website from scratch.
+
+## The Vision
+
+Before diving into code, I defined my goals:
+
+1. **Performance First**: Lighthouse score of 100 across all categories
+2. **Developer Experience**: Type-safe, modern tooling
+3. **Easy Content Management**: No database, Git-based CMS
+4. **Beautiful Design**: Unique typography, smooth animations
+5. **Great UX**: Fast load times, accessible, responsive
+
+## Tech Stack Overview
+
+Here's what powers this website:
+
+- **Framework**: Next.js 16 with App Router
+- **Styling**: Vanilla Extract CSS
+- **Content**: Keystatic CMS with MDX
+- **Animations**: Framer Motion
+- **Deployment**: Netlify
+- **Hosting**: GitHub (content storage)
+- **Syntax Highlighting**: Shiki
+- **Editor**: PrismJS for code display
+- **Sound Effects**: use-sound
+
+Let me walk through each component in detail.
+
+## Project Setup
+
+Starting a Next.js project has never been easier:
+
+```bash
+npx create-next-app@latest my-portfolio
+```
+
+I chose these options:
+- TypeScript: Yes
+- ESLint: Yes
+- Tailwind CSS: No (using Vanilla Extract instead)
+- App Router: Yes
+- Import Alias: @/*
+
+## The Directory Structure
+
+Here's how the project is organized:
+
+```
+/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   ├── components/        # Client layout component
+│   ├── keystatic/        # CMS admin pages
+│   ├── writing/          # Blog posts
+│   ├── work/             # Projects page
+│   ├── layout.tsx        # Root layout
+│   └── page.tsx          # Home page
+├── components/            # React components
+│   ├── common/          # Shared components
+│   ├── home/             # Home page components
+│   ├── layout/           # Navigation, Footer
+│   └── blog/             # Blog-related components
+├── content/              # MDX content
+│   └── posts/           # Blog posts
+├── lib/                 # Utilities
+├── styles/              # Theme and global styles
+└── public/             # Static assets
+```
+
+## Styling with Vanilla Extract
+
+One of the key decisions was to use Vanilla Extract instead of Tailwind or styled-components. Here's why:
+
+### Type-Safe Theming
+
+I created a comprehensive theme system in `styles/theme.css.ts`:
+
+```typescript
+import { createGlobalTheme, createThemeContract, globalStyle } from '@vanilla-extract/css';
+
+export const vars = createThemeContract({
+  color: {
+    primary: { default: null, dark: null, light: null },
+    background: { default: null, alt: null },
+    text: { primary: null, secondary: null },
+    // ... more tokens
+  },
+  spacing: { xs: null, sm: null, md: null, lg: null, xl: null },
+  // ... more categories
+});
+
+// Light theme
+createGlobalTheme(':root', vars, {
+  color: {
+    primary: { default: '#DC143C', dark: '#8B0000', light: '#FF6B6B' },
+    // ...
+  },
+  // ...
+});
+
+// Dark theme
+createGlobalTheme('[data-theme="dark"]', vars, {
+  color: {
+    primary: { default: '#FF4D6A', dark: '#DC143C', light: '#FF8A9E' },
+    // ...
+  },
+  // ...
+});
+```
+
+### Component Styles
+
+Each component has its own CSS file using vanilla-extract:
+
+```typescript
+// components/layout/Navigation.css.ts
+import { vars } from '@/styles/theme.css';
+import { style } from '@vanilla-extract/css';
+
+export const nav = style({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 1000,
+  backgroundColor: vars.color.background.default,
+  backdropFilter: 'blur(12px)',
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+```
+
+### Dark Mode Implementation
+
+The dark mode toggle uses a simple but effective approach:
+
+1. Store preference in localStorage
+2. Check system preference as fallback
+3. Apply `data-theme` attribute to `<html>`
+
+```typescript
+// In the theme initialization script
+(function() {
+  try {
+    var theme = localStorage.getItem('theme') || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (e) {}
+})();
+```
+
+## Content Management with Keystatic
+
+Instead of using a traditional CMS or headless CMS, I chose Keystatic because:
+
+- Content lives in the repository as MDX
+- No database required
+- Git-based workflow
+- Full TypeScript support
+
+### Configuration
+
+The Keystatic configuration in `keystatic.config.tsx` defines two collections:
+
+1. **Posts** - Blog articles
+2. **Projects** - Portfolio projects
+
+```typescript
+posts: collection({
+  label: "Posts",
+  slugField: "slug",
+  path: "content/posts/*",
+  format: { contentField: "content" },
+  entryLayout: "content",
+  schema: {
+    title: fields.text({ label: "Title" }),
+    slug: fields.text({ label: "Slug" }),
+    // ... more fields
+    content: fields.document({
+      label: "Content",
+      formatting: true,
+      dividers: true,
+      links: true,
+    }),
+  },
+}),
+```
+
+### Custom Component Blocks
+
+I created custom blocks for rich content:
+
+- **Image Block**: For inserting images with captions
+- **Sandbox Block**: Interactive code editor
+- **Illustration Block**: Visual demonstrations
+- **Playground Block**: Interactive examples
+
+These blocks allow me to create highly interactive blog posts with live code examples.
+
+## The Home Page
+
+The home page features a unique hero section with a TypeScript code block that introduces me:
+
+```typescript
+const developer = {
+  name: "Raju Lamsal",
+  role: "Front End Web Developer",
+  skills: ["JavaScript", "TypeScript", "React JS", "HTML", "CSS"],
+  passion: "Building visually appealing web application."
+};
+```
+
+The code is syntax-highlighted using Shiki and includes a copy button.
+
+### Featured Sections
+
+The home page also displays:
+
+- **Featured Projects**: From Keystatic CMS
+- **Latest Writing**: Recent blog posts
+- **Contact Options**: Links to connect
+
+## Animations with Framer Motion
+
+Smooth animations enhance the user experience. I implemented:
+
+### Page Transitions
+
+```typescript
+// components/layout/PageTransition.tsx
+'use client';
+import { motion } from 'framer-motion';
+
+export function PageTransition({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+### Scroll Button
+
+A scroll-to-top button appears when the user scrolls down:
+
+```typescript
+// components/layout/ScrollButton.tsx
+'use client';
+import { useState, useEffect } from 'react';
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+
+export function ScrollButton() {
+  const { scrollY } = useScroll();
+  const [visible, setVisible] = useState(false);
+  
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setVisible(latest > 300);
+  });
+  
+  // ... scroll to top logic
+}
+```
+
+### Sound Effects
+
+For extra polish, I added subtle sound effects using the `use-sound` library. Sound plays on button clicks and interactions, creating a more immersive experience.
+
+## SEO Implementation
+
+The website achieves excellent SEO scores through:
+
+### Metadata API
+
+```typescript
+// app/layout.tsx
+export const metadata: Metadata = {
+  title: 'Rajul Amsal | Full-Stack Developer',
+  description: 'Full-stack developer specializing in React, Next.js, and TypeScript...',
+  openGraph: {
+    title: 'Rajul Amsal',
+    description: 'Full-stack developer...',
+    url: 'https://rlamsal.com',
+    siteName: 'Rajul Amsal',
+    locale: 'en_US',
+    type: 'website',
+  },
+};
+```
+
+### Sitemap and Robots
+
+```typescript
+// app/sitemap.ts
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    { url: 'https://rlamsal.com', lastModified: new Date() },
+    { url: 'https://rlamsal.com/about', lastModified: new Date() },
+    { url: 'https://rlamsal.com/work', lastModified: new Date() },
+    { url: 'https://rlamsal.com/writing', lastModified: new Date() },
+  ];
+}
+```
+
+### Structured Data
+
+I added JSON-LD schema for the Person type to help search engines understand the content better.
+
+## Performance Optimizations
+
+To achieve a perfect Lighthouse score:
+
+### Image Optimization
+
+All images use Next.js Image component with proper sizing and modern formats (AVIF, WebP).
+
+### Font Optimization
+
+Using `next/font` for Google Fonts with display swap:
+
+```typescript
+// In layout - using link tags for preconnect
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Cartograph..." rel="stylesheet" />
+```
+
+### Code Splitting
+
+Next.js automatically code-splits each route. I also use dynamic imports for heavy components.
+
+### Static Generation
+
+All pages are statically generated at build time for fastest possible response times.
+
+## Accessibility
+
+The website achieves 100% accessibility through:
+
+- Semantic HTML elements
+- Proper heading hierarchy
+- Skip to content link
+- Keyboard navigation support
+- Proper color contrast (tested with Lighthouse)
+- ARIA labels where needed
+
+## Deployment to Netlify
+
+The website is deployed to Netlify with the following configuration:
+
+### netlify.toml
+
+```toml
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[redirects]]
+  from = "/:path*/"
+  to = "/:path*/index.html"
+  status = 200
+```
+
+### Environment Variables
+
+- `KEYSTATIC_SECRET`: For CMS authentication
+- GitHub OAuth credentials for Keystatic
+
+### Netlify Adaptor
+
+Using `@keystatic/next` for seamless integration with Netlify's serverless functions.
+
+## Continuous Development
+
+The GitHub-based workflow makes content management easy:
+
+1. Write content in Keystatic admin UI
+2. Changes are committed to GitHub
+3. Netlify automatically deploys on push
+4. Preview deployments for pull requests
+
+## Challenges and Solutions
+
+### Challenge: Client/Server Component Boundaries
+
+Next.js App Router requires careful management of client vs. server components. I solved this by:
+
+- Creating a `ClientLayout` component for client-side interactivity
+- Keeping the root layout as a server component for metadata
+
+### Challenge: Contrast Ratios
+
+Meeting accessibility standards required adjusting color values. I darkened the secondary text color from `#666666` to `#4D4D4D`.
+
+### Challenge: Code Block Display
+
+The home page code block wasn't displaying fully due to `whiteSpace: pre-wrap`. Changed to `whiteSpace: 'pre'` with horizontal scrolling.
+
+## Future Improvements
+
+While the website is performing well, there's always room for improvement:
+
+- [ ] Add more interactive playground examples
+- [ ] Implement RSS feed optimization
+- [ ] Add more comprehensive testing
+- [ ] Implement view counts for blog posts
+- [ ] Add comments system
+
+## Conclusion
+
+Building this portfolio was an exciting journey through modern web development. Using Next.js 16, Vanilla Extract, and Keystatic provided an excellent developer experience while delivering a fast, accessible, and beautiful website.
+
+The key takeaways:
+
+1. **Choose the right tools**: Each technology was chosen for specific benefits
+2. **Type safety matters**: TypeScript and Vanilla Extract catch errors early
+3. **Performance is features**: Every optimization improves user experience
+4. **Accessibility is not optional**: 100% should be the goal
+5. **Simplicity wins**: Git-based CMS removes complexity
+
+I hope this guide helps you build your own portfolio. Feel free to explore the source code on GitHub and adapt any techniques you find useful.
+
+Happy building!

@@ -1,41 +1,44 @@
-import { CodeBlock } from '@/components/common/CodeBlock';
-import { BlogCard } from '@/components/home/BlogCard';
-import { HeroContent } from '@/components/home/HeroContent';
-import { HeroVisual } from '@/components/home/HeroVisual';
-import { ProjectCard } from '@/components/home/ProjectCard';
-import { getFeaturedProjects } from '@/lib/projects';
-import Link from 'next/link';
-import * as styles from './page.css';
+import { CodeBlock } from "@/components/common/CodeBlock";
+import { BlogCard } from "@/components/home/BlogCard";
+import { HeroContent } from "@/components/home/HeroContent";
+import { HeroVisual } from "@/components/home/HeroVisual";
+import { ProjectCard } from "@/components/home/ProjectCard";
+import { getFeaturedProjects } from "@/lib/projects";
+import Link from "next/link";
+import * as styles from "./page.css";
 
 const featuredProjects = await getFeaturedProjects();
 
 const latestPosts = [
   {
-    slug: 'getting-started-with-nextjs',
-    title: 'Getting Started with Next.js 16',
-    date: '2024-01-15',
-    excerpt: 'Learn how to build modern web applications with Next.js 16 and its new features.',
+    slug: "getting-started-with-nextjs",
+    title: "Getting Started with Next.js 16",
+    date: "2024-01-15",
+    excerpt:
+      "Learn how to build modern web applications with Next.js 16 and its new features.",
   },
   {
-    slug: 'testing-with-vitest',
-    title: 'Testing Best Practices with Vitest',
-    date: '2024-01-10',
-    excerpt: 'Discover how to write efficient and maintainable tests using Vitest.',
+    slug: "testing-with-vitest",
+    title: "Testing Best Practices with Vitest",
+    date: "2024-01-10",
+    excerpt:
+      "Discover how to write efficient and maintainable tests using Vitest.",
   },
   {
-    slug: 'framer-motion-animations',
-    title: 'Creating Animations with Smooth Framer Motion',
-    date: '2024-01-05',
-    excerpt: 'Add delightful animations to your React applications with Framer Motion.',
+    slug: "framer-motion-animations",
+    title: "Creating Animations with Smooth Framer Motion",
+    date: "2024-01-05",
+    excerpt:
+      "Add delightful animations to your React applications with Framer Motion.",
   },
 ];
 
 export default async function HomePage() {
   const codeContent = `const developer = {
   name: "Raju Lamsal",
-  role: "Junior Web Developer",
-  skills: ["PHP", "Next.js", "WordPress"],
-  passion: "Building efficient digital solutions"
+  role: "Front End Web Developer",
+  skills: ["JavaScript", "TypeScript", "React JS", "HTML", "CSS"],
+  passion: "Building visually appealing web application."
 };`;
 
   return (

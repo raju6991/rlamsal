@@ -1,0 +1,278 @@
+---
+title: Complete SEO Guide for Next.js Applications
+slug: seo-nextjs-guide
+excerpt: Master search engine optimization in Next.js with metadata API, sitemaps, structured data, and performance optimization.
+publishedDate: 2024-01-22
+tags:
+  - SEO
+  - Next.js
+  - Performance
+  - Tutorial
+---
+
+Search engine optimization is crucial for any website's success. Next.js provides powerful built-in tools to help your content rank higher in search results. Let's explore everything you need to know.
+
+## The Metadata API
+
+Next.js 13+ introduced a powerful Metadata API that makes SEO implementation straightforward.
+
+### Basic Metadata
+
+Add metadata to your pages using the export:
+
+```typescript
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Your Page Title',
+  description: 'Your page description here',
+};
+```
+
+### Dynamic Metadata
+
+For dynamic pages like blog posts, generate metadata from data:
+
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await getPost(params.slug);
+  
+  return {
+    title: `${post.title} | Your Site Name`,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: [{ url: post.coverImage }],
+    },
+  };
+}
+```
+
+## Open Graph and Social Sharing
+
+Control how your content appears when shared on social media:
+
+```typescript
+export const metadata: Metadata = {
+  openGraph: {
+    title: 'Your Title for Social',
+    description: 'Your description for social',
+    url: 'https://yoursite.com/page',
+    siteName: 'Your Site Name',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: 'https://yoursite.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Image description',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Your Title',
+    description: 'Your Description',
+    creator: '@yourhandle',
+    images: ['https://yoursite.com/og-image.jpg'],
+  },
+};
+```
+
+## Robots and Canonical URLs
+
+Control search engine crawling and prevent duplicate content:
+
+```typescript
+export const metadata: Metadata = {
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://yoursite.com/page',
+    languages: {
+      'en-US': 'https://yoursite.com/page',
+      'es-ES': 'https://yoursite.com/es/page',
+    },
+  },
+};
+```
+
+## Sitemap Generation
+
+Create a sitemap for better crawling:
+
+```typescript
+// app/sitemap.ts
+import { MetadataRoute } from 'next';
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://yoursite.com';
+  
+  const staticPages = [
+    { url: baseUrl, lastModified: new Date() },
+    { url: `${baseUrl}/about`, lastModified: new Date() },
+    { url: `${baseUrl}/work`, lastModified: new Date() },
+    { url: `${baseUrl}/writing`, lastModified: new Date() },
+  ];
+
+  const dynamicPages = [
+    // Fetch from your CMS or database
+    { slug: 'first-post', lastModified: new Date('2024-01-01') },
+    { slug: 'second-post', lastModified: new Date('2024-01-15') },
+  ].map((post) => ({
+    url: `${baseUrl}/writing/${post.slug}`,
+    lastModified: post.lastModified,
+  }));
+
+  return [...staticPages, ...dynamicPages];
+}
+```
+
+## Robots.txt
+
+Configure which pages search engines can access:
+
+```typescript
+// app/robots.ts
+import { MetadataRoute } from 'next';
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/private/', '/admin/'],
+    },
+    sitemap: 'https://yoursite.com/sitemap.xml',
+  };
+}
+```
+
+## Structured Data
+
+Help search engines understand your content with JSON-LD:
+
+```typescript
+export default function JsonLd({ data }: { data: ArticleData }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: data.title,
+          image: [data.coverImage],
+          datePublished: data.publishedDate,
+          dateModified: data.updatedDate,
+          author: {
+            '@type': 'Person',
+            name: 'Your Name',
+            url: 'https://yoursite.com/about',
+          },
+        }),
+      }}
+    />
+  );
+}
+```
+
+For a personal website, use Person or ProfilePage schema:
+
+```typescript
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Your Name',
+  url: 'https://yoursite.com',
+  jobTitle: 'Full Stack Developer',
+  sameAs: [
+    'https://github.com/yourusername',
+    'https://linkedin.com/in/yourusername',
+    'https://twitter.com/yourhandle',
+  ],
+};
+```
+
+## Performance and Core Web Vitals
+
+Google considers page experience as a ranking factor. Focus on:
+
+### Largest Contentful Paint (LCP)
+
+Optimize your largest element's loading:
+
+- Use `next/image` with proper sizing
+- Preload critical fonts
+- Use CDN for static assets
+
+```typescript
+import Image from 'next/image';
+
+export function HeroImage() {
+  return (
+    <Image
+      src="/hero.jpg"
+      alt="Hero description"
+      width={1200}
+      height={600}
+      priority
+      sizes="100vw"
+    />
+  );
+}
+```
+
+### Cumulative Layout Shift (CLS)
+
+Prevent layout shifts by reserving space:
+
+- Always specify dimensions for images
+- Use font-display: swap with proper fallback fonts
+- Reserve space for dynamic content
+
+### First Input Delay (FID)
+
+Keep your JavaScript bundle small:
+
+- Use dynamic imports for non-critical code
+- Code split your application
+- Remove unused dependencies
+
+## Audit with Lighthouse
+
+Regularly run Lighthouse audits to identify issues:
+
+```bash
+npx lighthouse https://yoursite.com --output html
+```
+
+Focus on improving:
+
+- Performance score (aim for 90+)
+- Accessibility (aim for 100)
+- Best Practices (aim for 100)
+- SEO (aim for 100)
+
+## Conclusion
+
+Next.js makes SEO implementation straightforward with its built-in APIs. The key is to:
+
+1. Use the Metadata API for titles and descriptions
+2. Add Open Graph tags for social sharing
+3. Generate sitemaps and robots.txt
+4. Implement structured data
+5. Optimize Core Web Vitals
+
+Following these practices will help your content rank better and attract more organic traffic.
